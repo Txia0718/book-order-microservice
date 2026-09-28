@@ -13,12 +13,12 @@
 
     <!-- 父工程坐标 -->
     <groupId>com.demo</groupId>
-    <artifactId>microservice-demo</artifactId>
+    <artifactId>book-order-microservice</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
 
-    <name>microservice-demo</name>
-    <description>微服务学习实践 - 父工程</description>
+    <name>book-order-microservice</name>
+    <description>图书订单微服务实践 - 父工程</description>
 
     <!-- 统一版本管理 -->
     <properties>
@@ -29,6 +29,7 @@
         <bcprov.version>1.84</bcprov.version>
         <spring-cloud.version>2025.1.2</spring-cloud.version>
         <gateway.version>5.0.3</gateway.version>
+        <seata.version>2.6.0</seata.version>
     </properties>
 
     <!-- 子模块列表 -->
@@ -42,7 +43,6 @@
     <!-- 版本锁定（子模块继承，无需重复指定版本） -->
     <dependencyManagement>
         <dependencies>
-            <!-- Spring Cloud Alibaba BOM -->
             <dependency>
                 <groupId>com.alibaba.cloud</groupId>
                 <artifactId>spring-cloud-alibaba-dependencies</artifactId>
@@ -50,7 +50,16 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
-            <!-- 各子模块特有依赖的版本统一在此管理 -->
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-spring-boot-starter</artifactId>
+                <version>${seata.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.seata</groupId>
+                <artifactId>seata-all</artifactId>
+                <version>${seata.version}</version>
+            </dependency>
             <dependency>
                 <groupId>com.baomidou</groupId>
                 <artifactId>mybatis-plus-spring-boot4-starter</artifactId>
@@ -86,7 +95,6 @@
         </dependencies>
     </dependencyManagement>
 
-    <!-- 所有子模块共享的公共依赖 -->
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -104,7 +112,6 @@
         </dependency>
     </dependencies>
 
-    <!-- 公共构建配置 -->
     <build>
         <plugins>
             <plugin>
