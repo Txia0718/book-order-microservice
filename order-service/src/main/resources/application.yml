@@ -4,36 +4,41 @@ spring:
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
     compatibility-verifier:
       enabled: false
     sentinel:                      # 👈 新增 Sentinel 配置
       transport:
-        dashboard: localhost:8858
+        dashboard: ${SENTINEL_DASHBOARD:localhost:8858}
         port: 8719                 # 客户端与控制台通信端口（如果它被占用，会自动+1）
       eager: true                  # 启动时立即向控制台注册
       datasource:
         flow-rules: # 流控规则数据源（名字可自定义）
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
             dataId: order-service-flow-rules
             groupId: SENTINEL_GROUP
             rule-type: flow
         degrade-rules: # 熔断规则数据源
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
             dataId: order-service-degrade-rules
             groupId: SENTINEL_GROUP
             rule-type: degrade
 server:
   port: 8082
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 management:
   tracing:
     sampling:
       probability: 1.0   # 采样率，生产环境建议 0.1，开发测试用 1.0
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans   # Zipkin 服务端地址
+      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans   # Zipkin 服务端地址
   endpoints:
     web:
       exposure:
@@ -46,12 +51,12 @@ seata:
   registry:
     type: nacos
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
       group: SEATA_GROUP
       application: seata-server
   config:
     type: nacos
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
       group: SEATA_GROUP
       data-id: seata-server

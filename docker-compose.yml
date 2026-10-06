@@ -1,0 +1,138 @@
+services:
+  # ==================== 中间件层 ====================
+  mysql:
+    image: mysql:8.4.11
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: "123456"
+      MYSQL_DATABASE: book_order_microservice
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - microservice-net
+
+  nacos:
+    image: nacos/nacos-server:v3.1.1
+    container_name: nacos
+    restart: always
+    environment:
+      MODE: standalone
+      NACOS_AUTH_TOKEN: "SecretKey012345678901234567890123456789012345678901234567890123456789"
+      NACOS_AUTH_IDENTITY_KEY: "serverIdentity"
+      NACOS_AUTH_IDENTITY_VALUE: "security"
+    ports:
+      - "8080:8080"
+      - "8848:8848"
+      - "9848:9848"
+    volumes:
+      - nacos-data:/home/nacos/data
+    networks:
+      - microservice-net
+
+  seata:
+    image: apache/seata-server:2.6.0
+    container_name: seata
+    restart: always
+    environment:
+      NACOS_HOST: nacos
+      NACOS_PORT: 8848
+    ports:
+      - "8091:8091"
+      - "7091:7091"
+    volumes:
+      - ./seata/application.yml:/seata-server/resources/application.yml
+    depends_on:
+      - nacos
+    networks:
+      - microservice-net
+
+  sentinel:
+    image: ochh/sentinel-dashboard:v1.8.9
+    container_name: sentinel
+    restart: always
+    ports:
+      - "8858:8858"
+    networks:
+      - microservice-net
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    container_name: zipkin
+    restart: always
+    ports:
+      - "9411:9411"
+    networks:
+      - microservice-net
+
+  # ==================== 微服务层 ====================
+  book-stock:
+    image: book-stock:v1
+    container_name: book-stock
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      NACOS_HOST: nacos
+      NACOS_PORT: 8848
+      ZIPKIN_HOST: zipkin
+      ZIPKIN_PORT: 9411
+      SENTINEL_DASHBOARD: sentinel:8858
+    ports:
+      - "8081:8081"
+    depends_on:
+      - mysql
+      - nacos
+      - seata
+    networks:
+      - microservice-net
+
+  order-service:
+    image: order-service:v1
+    container_name: order-service
+    restart: always
+    environment:
+      MYSQL_HOST: mysql
+      MYSQL_PORT: 3306
+      NACOS_HOST: nacos
+      NACOS_PORT: 8848
+      ZIPKIN_HOST: zipkin
+      ZIPKIN_PORT: 9411
+      SENTINEL_DASHBOARD: sentinel:8858
+    ports:
+      - "8082:8082"
+    depends_on:
+      - mysql
+      - nacos
+      - seata
+    networks:
+      - microservice-net
+
+  gateway:
+    image: gateway:v1
+    container_name: gateway
+    restart: always
+    environment:
+      NACOS_HOST: nacos
+      NACOS_PORT: 8848
+      ZIPKIN_HOST: zipkin
+      ZIPKIN_PORT: 9411
+      SENTINEL_DASHBOARD: sentinel:8858
+    ports:
+      - "8083:8083"
+    depends_on:
+      - nacos
+    networks:
+      - microservice-net
+
+# ==================== 网络 & 数据卷 ====================
+networks:
+  microservice-net:
+    driver: bridge
+
+volumes:
+  mysql-data:
+  nacos-data:

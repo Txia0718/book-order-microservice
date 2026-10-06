@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
+@RequestMapping(produces = "application/json;charset=UTF-8")
 public class BookController {
     @Autowired
     private BookService bookService;

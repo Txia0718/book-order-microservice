@@ -2,31 +2,31 @@ spring:
   application:
     name: book-stock
   datasource:
-    url: "jdbc:mysql://localhost:3306/book_order_microservice?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
+    url: "jdbc:mysql://${MYSQL_HOST:localhost}:${MYSQL_PORT:3306}/book_order_microservice?useUnicode=true&characterEncoding=utf8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true"
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: "123456"
+    username: ${MYSQL_USER:root}
+    password: "${MYSQL_PASSWORD:123456}"
   cloud:
     nacos:
       discovery:
-        server-addr: 127.0.0.1:8848
+        server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
     compatibility-verifier:
       enabled: false
     sentinel:                      # 👈 新增 Sentinel 配置
       transport:
-        dashboard: localhost:8858
+        dashboard: ${SENTINEL_DASHBOARD:localhost:8858}
         port: 8719
       eager: true
       datasource:
         flow-rules: # 流控规则数据源（名字可自定义）
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
             dataId: book-stock-flow-rules
             groupId: SENTINEL_GROUP
             rule-type: flow
         degrade-rules: # 熔断规则数据源
           nacos:
-            server-addr: 127.0.0.1:8848
+            server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
             dataId: book-stock-degrade-rules
             groupId: SENTINEL_GROUP
             rule-type: degrade
@@ -35,13 +35,18 @@ mybatis-plus:
     map-underscore-to-camel-case: true
 server:
   port: 8081
+  servlet:
+    encoding:
+      charset: UTF-8
+      enabled: true
+      force: true
 management:
   tracing:
     sampling:
       probability: 1.0   # 采样率，生产环境建议 0.1，开发测试用 1.0
   zipkin:
     tracing:
-      endpoint: http://localhost:9411/api/v2/spans   # Zipkin 服务端地址
+      endpoint: http://${ZIPKIN_HOST:localhost}:${ZIPKIN_PORT:9411}/api/v2/spans
   endpoints:
     web:
       exposure:
@@ -54,12 +59,12 @@ seata:
   registry:
     type: nacos
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
       group: SEATA_GROUP
       application: seata-server
   config:
     type: nacos
     nacos:
-      server-addr: 127.0.0.1:8848
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
       group: SEATA_GROUP
       data-id: seata-server

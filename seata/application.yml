@@ -1,0 +1,52 @@
+server:
+  port: 8091
+
+spring:
+  application:
+    name: seata-server
+  main:
+    web-application-type: none
+
+logging:
+  config: classpath:logback-spring.xml
+  file:
+    path: ${log.home:${user.home}/logs/seata}
+  extend:
+    logstash-appender:
+      enabled: false
+      destination: 127.0.0.1:4560
+    kafka-appender:
+      enabled: false
+      bootstrap-servers: 127.0.0.1:9092
+      topic: logback_to_logstash
+      producer:
+        acks: 0
+        linger-ms: 1000
+        max-block-ms: 0
+    metric-appender:
+      enabled: false
+
+console:
+  port: 7091
+  user:
+    username: seata
+    password: seata
+
+seata:
+  config:
+    type: nacos
+    nacos:
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
+      group: SEATA_GROUP
+      data-id: seata-server
+  registry:
+    type: nacos
+    nacos:
+      application: seata-server
+      server-addr: ${NACOS_HOST:127.0.0.1}:${NACOS_PORT:8848}
+      group: SEATA_GROUP
+      cluster: default
+  store:
+    mode: file
+    file:
+      dir: /root/sessionStore
